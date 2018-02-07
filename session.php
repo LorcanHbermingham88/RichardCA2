@@ -16,7 +16,7 @@ header('Pragma: no-cache');
    $row = mysqli_fetch_array($ses_sql,MYSQLI_ASSOC); // runs the query and assigns the returned data to the vatiable
    $col = mysqli_fetch_array($ses1,MYSQLI_ASSOC); // runs the query and assigns the returned data to the vatiable
 
-   $login_session = $row['Username']; // assigns the username stored in the object row to the variable
+   $login_session = $user_check; // assigns the username stored in the object row to the variable
    $login1 = $col['hashedPassword']; // assigns the username stored in the object col to the variable
 
    if(!isset($_SESSION['login_user'])){

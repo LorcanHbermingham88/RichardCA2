@@ -8,7 +8,8 @@ header('Pragma: no-cache');
 
 include("config.php");
 session_start(); // starts a session
-$error = ''; // variable to hold error message 
+$error = ''; // variable to hold error message
+$foundUsername = "";
 
 if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
     {
@@ -34,10 +35,46 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
                 $myusername = filter_var($_POST['username'],FILTER_SANITIZE_STRING); // takes the entered username and Strip tags thenand assigns it to a variable
                 $mypassword = mysqli_real_escape_string($db,$_POST['password']); //filters out special characters in a string and assigns to a variable
 
-                $salt = "SELECT hashedPassword FROM tester WHERE Username = '$myusername'"; // query to return the hashepassword and salt of the username entered
+                $sqlUsername = mysqli_query($db,"Select Username FROM tester");
+
+                if($sqlUsername->num_rows>0)
+                {
+                    while($row = $sqlUsername -> fetch_assoc())
+                    {
+                        $returnUsername = $row["Username"];
+
+                        if(hash_equals($returnUsername,crypt($myusername,$returnUsername)))
+                        {
+                          $foundUsername = $returnUsername;
+                        }
+
+
+                    }
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                $salt = "SELECT hashedPassword FROM tester WHERE Username = '$foundUsername'"; // query to return the hashepassword and salt of the username entered
                 $saltReturn = mysqli_query($db,$salt); // run the query
                 $row = mysqli_fetch_all($saltReturn,MYSQLI_ASSOC); // mysqli_fetch_all returns a array and assigns it to the variable
-                    
+
                 $arr = (array)$row; // turns the variable into an array and assigns it to a variable
                 if (empty($arr)) // checks if the array is empty
                     {
@@ -47,20 +84,20 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
                     {
                         $returned = $row[0]['hashedPassword']; // position 0 holds the hashed password and assigns it to the variable
                         $array =  explode( '$', $returned ); // seperates the hashed password by the dollar sign which gives the salt and the hashed password inside a array
-                    
+
                         $iterations = 1000; // the amount of iterarions you want to use in the hashing algorithm
                         $hash = hash_pbkdf2("sha256", $mypassword, $array[1], $iterations, 32); // hashing algorithm to hash the password
                         $saltyHash = '$' . $array[1] . '$' . $hash; // Concatenating the hashed password with the salt andd dollar signs eg. $Salt$HashedPassword
-                        $nameResult = mysqli_query($db,"SELECT id FROM tester WHERE Username = '$myusername' and hashedPassword = '$saltyHash'");// query to select the username with the matching username and hashedpassword
+                        $nameResult = mysqli_query($db,"SELECT id FROM tester WHERE Username = '$foundUsername' and hashedPassword = '$saltyHash'");// query to select the username with the matching username and hashedpassword
                         $nameCount = mysqli_num_rows($nameResult);
                         if($nameCount == 1)
                             {
-                                $result = mysqli_query($db,"SELECT id FROM tester WHERE Username = '$myusername' and hashedPassword = '$saltyHash'"); // query to select the username with the matching username and hashedpassword
+                                $result = mysqli_query($db,"SELECT id FROM tester WHERE Username = '$foundUsername' and hashedPassword = '$saltyHash'"); // query to select the username with the matching username and hashedpassword
                                 $count = mysqli_num_rows($result);// counts the number of rows in the variable result
-                                $query = "UPDATE ip SET inActive = False "; // query to set the inActive flag to false on successful login 
+                                $query = "UPDATE ip SET inActive = False "; // query to set the inActive flag to false on successful login
                                 $result = mysqli_query($db,$query); // runs the query
 
-                                if($count == 1) 
+                                if($count == 1)
                                     {
                     			         $_SESSION['login_user'] = $myusername;
                     			         header("location: welcome.php"); // goes to the welcome page
@@ -107,6 +144,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
                   <label>Password  :</label><input type = "password" name = "password" class = "box" /><br/><br />
                   <input type = "submit" value = " Submit "/>
                   <input type = "button" value = " Registration " onclick="window.location.href='Register.php'"/><br />
+                    <input type = "button" value = " Forgot Password" onclick="window.location.href='ForgotPassword.php'"/><br />
                </form>
 
                <div style = "font-size:11px; color:#cc0000; margin-top:10px"><?php echo $error; ?></div>

@@ -15,8 +15,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
             $email = $_POST['email']; // setting the variable to the entered username
             $dob = $_POST['dob']; // setting the variable to the entered password
             $countEmail = 0;
-            
-            
+            $countUsername = 0;
+
+
             $ip = $_SERVER['REMOTE_ADDR']; // gets the ip address of the user and assigns it to a variable
             $userAgent = $_SERVER['HTTP_USER_AGENT']; // gets the user agent details of the user and assigns it to a variable
 
@@ -29,22 +30,20 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
             $result = mysqli_query($db,"SELECT COUNT(hashedUserAgentIP) AS Count FROM ip WHERE hashedUserAgentIP = '$hash' AND `timestamp` > (now() - interval 5 minute) AND inActiveReg = True"); // query to check the database for matching useragent+ip and couunts them if they are still active
             $row = mysqli_fetch_all($result,MYSQLI_ASSOC);
 
-            if($row[0]['Count'] >= 3) // if the value returned by the query is 3 or more.
+            if($row[0]['Count'] >= 1000) // if the value returned by the query is 3 or more.
                 {
                     echo "Your are allowed to create 3 Users in 5 minutes";
                 }
             else
                 {
                     mysqli_query($db, "INSERT INTO `ip` (`hashedUserAgentIP` ,`timestamp`, `inActive`) VALUES ('$hash',CURRENT_TIMESTAMP, 'True')"); // query to insert the hashed useragent+ip into the database
-                
+
                     if (isset($_POST['username']) && isset($_POST['password'])) // if the 2 variables are set continue
                     {
 
 
-                        $username = $_POST['username']; // setting the variable to the entered username
-                        $password = $_POST['password']; // setting the variable to the entered password
 
-                        $sqlEmail = mysqli_query($db,"Select id, Email FROM tester");
+                        $sqlEmail = mysqli_query($db,"Select Email FROM tester");
 
                         if($sqlEmail->num_rows>0)
                         {
@@ -55,11 +54,26 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
                                 {
                                     $countEmail ++;
                                 }
-                                
                             }
                         }
-                        
-                        if (mysqli_num_rows(mysqli_query($db,"SELECT Username FROM tester WHERE Username='$username'")) != 0) // query to check if the username already exists
+
+                        $sqlUsername = mysqli_query($db,"Select Username FROM tester");
+
+                        if($sqlUsername->num_rows>0)
+                        {
+                            while($row = $sqlUsername -> fetch_assoc())
+                            {
+                                $returnUsername = $row["Username"];
+
+                                if(hash_equals($returnUsername,crypt($username,$returnUsername)))
+                                {
+                                    //echo "3";
+                                    $countUsername ++;
+                                }
+
+                            }
+                        }
+                        if ($countUsername>0) // query to check if the username already exists
                         {
                             echo "Username already exists";
                         }
@@ -81,13 +95,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
                             $saltHash = '$' . $salt . '$' . $hash; //  Concatenating the hashed password with the salt andd dollar signs eg. $Salt$HashedPassword
                             $cryptEmail = crypt($email);
                             $cryptDOB = crypt($dob);
-                            $result = mysqli_query($db,"INSERT INTO tester (Username, hashedPassword,Email,DOB) VALUES  ('$username', '$saltHash','$cryptEmail','$cryptDOB')");
-                            header("location:Login.php"); // query to insert the newly created user into the database
+                            $cryptUsername = crypt($username);
+
+                            $result = mysqli_query($db,"INSERT INTO tester (Username, hashedPassword,Email,DOB) VALUES  ('$cryptUsername', '$saltHash','$cryptEmail','$cryptDOB')");
+                            //header("location:Login.php"); // query to insert the newly created user into the database
                         }
                     }
                 }
-        }  
-    } 
+        }
+    }
 ?>
 <html>
 
