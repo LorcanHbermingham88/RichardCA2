@@ -98,7 +98,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
                             $cryptUsername = crypt($username);
 
                             $result = mysqli_query($db,"INSERT INTO tester (Username, hashedPassword,Email,DOB) VALUES  ('$cryptUsername', '$saltHash','$cryptEmail','$cryptDOB')");
-                            //header("location:Login.php"); // query to insert the newly created user into the database
+                            header("location:Login.php"); // query to insert the newly created user into the database
                         }
                     }
                 }

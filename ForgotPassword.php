@@ -1,3 +1,37 @@
+<<?php
+include("config.php");
+
+  $countEmail = 0;
+
+if (isset($_POST['email']))
+{
+  $email = $_POST['email'];
+  $sqlEmail = mysqli_query($db,"Select Email FROM tester");
+
+
+  if($sqlEmail->num_rows>0)
+  {
+      while($row = $sqlEmail -> fetch_assoc())
+      {
+          $returnEmail = $row["Email"];
+          if(hash_equals($returnEmail,crypt($email,$returnEmail)))
+          {
+              $countEmail ++;
+              echo "found";
+              //$token =   $salt = random_bytes(32);
+              header("location:displaytoken.php");
+          }
+          else
+            {
+              echo"not found";
+
+            }
+        }
+    }
+  }
+
+
+?>
 <html>
 
    <head>
