@@ -1,7 +1,19 @@
 <<?php
 include("config.php");
+session_start();
 
   $countEmail = 0;
+
+  function generateRandomString($length = 10) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+
 
 if (isset($_POST['email']))
 {
@@ -17,15 +29,15 @@ if (isset($_POST['email']))
           if(hash_equals($returnEmail,crypt($email,$returnEmail)))
           {
               $countEmail ++;
+              $userEmail = $returnEmail;
+              $_SESSION['token'] = generateRandomString();
+              $newtok = $_SESSION['token'];
+              $result = mysqli_query($db,"UPDATE tester SET resetToken = '$newtok' WHERE Email = '$userEmail'");
               echo "found";
               //$token =   $salt = random_bytes(32);
               header("location:displaytoken.php");
           }
-          else
-            {
-              echo"not found";
-
-            }
+        
         }
     }
   }

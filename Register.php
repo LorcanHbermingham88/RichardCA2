@@ -56,7 +56,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
                                 }
                             }
                         }
-
                         $sqlUsername = mysqli_query($db,"Select Username FROM tester");
 
                         if($sqlUsername->num_rows>0)
@@ -70,7 +69,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
                                     //echo "3";
                                     $countUsername ++;
                                 }
-
                             }
                         }
                         if ($countUsername>0) // query to check if the username already exists

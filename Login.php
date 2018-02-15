@@ -52,25 +52,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") // If the method is post continue
                     }
                 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 $salt = "SELECT hashedPassword FROM tester WHERE Username = '$foundUsername'"; // query to return the hashepassword and salt of the username entered
                 $saltReturn = mysqli_query($db,$salt); // run the query
                 $row = mysqli_fetch_all($saltReturn,MYSQLI_ASSOC); // mysqli_fetch_all returns a array and assigns it to the variable
